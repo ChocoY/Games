@@ -9,8 +9,8 @@ var Enemies = new Array();
 var tank;
 
 !function init() {
-    tank = new Tank(200,200,5,DIRECTION.UP);
-    Enemies.push(new Tank(200,100,5,DIRECTION.DOWN));
+    createTank();
+    //createEnemy();
     draw();
 }();
 

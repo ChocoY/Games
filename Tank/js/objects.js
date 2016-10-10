@@ -3,26 +3,40 @@
  */
 
 
-var DIRECTION ={
-    UP:0,RIGHT:1,DOWN:2,LEFT:3
+const DIRECTION ={
+    UP:Math.PI*0.5,RIGHT:0,DOWN:Math.PI*1.5,LEFT:Math.PI,
+    randomDirection: function (){
+        return Math.floor(Math.random()*4) * Math.PI/2;
+    }
 };
-var TANK_SPEED = {
-    SLOW:5,FAST:12
+const TANK_SPEED = {
+    SLOW:3,FAST:5
 };
-var BULLET_SPEED = {
-  SLOW:8,FAST:12
+const BULLET_SPEED = {
+  SLOW:6,FAST:8
 };
-var BULLET_TYPE = {
+const BULLET_TYPE = {
     TANK:0,ENEMY:1
 };
+const OBJ_TYPE = {
+    TANK:0,ENEMY:1,TANK_BULLET:2,ENEMY_BULLET:3
+};
 
+const ENEMY_SETTING = {
+    MOVE:0.9,FIRE:0.05,TURN:0.1
+};
+
+const GUN_STYLE = {
+    NORMAL:0,SHOTGUN:1
+};
 //Obj
 class Obj{
-    constructor(x,y,speed,direction) {
+    constructor(x,y,speed,direction,type) {
         this.x = x;
         this.y = y;
         this.direction = direction;
         this.speed = speed;
+        this.type = type;
         this.isAlive = true;
     }
 
@@ -48,7 +62,29 @@ class Obj{
                 this.x += this.speed;
                 break;
             default:
-            // nothing
+                if(this.type == OBJ_TYPE.TANK_BULLET || this.type == OBJ_TYPE.ENEMY_BULLET) {
+                    this.y -= this.speed * Math.sin(this.direction);
+                    this.x += this.speed * Math.cos(this.direction);
+                }
+        }
+        if(this.type == OBJ_TYPE.TANK || this.type == OBJ_TYPE.ENEMY){
+            if(this.x < 15){
+                this.x = 15;
+            }
+            if(this.x > SCREEN_W - 15){
+                this.x = SCREEN_W - 15;
+            }
+            if(this.y < 15){
+                this.y = 15;
+            }
+            if(this.y > SCREEN_H - 15){
+                this.y = SCREEN_H - 15;
+            }
+        }
+        if(this.type == OBJ_TYPE.TANK_BULLET || this.type == OBJ_TYPE.TANK_BULLET) {
+            if(this.x < 0 || this.x > SCREEN_W || this.y < 0 || this.y > SCREEN_H){
+                this.die();
+            }
         }
     }
 }
@@ -56,64 +92,82 @@ class Obj{
 
 //tank
 class Tank extends Obj{
+    constructor(x,y,speed,direction,type,gunStyle) {
+        super(x,y,speed,direction,type);
+        this.gunStyle=gunStyle;
+    }
+
     fire(){
+        var type;
+        var from;
+        var direction = this.direction;
+        if(this.type == OBJ_TYPE.TANK){
+            type = OBJ_TYPE.TANK_BULLET;
+            from = BULLET_TYPE.TANK;
+        } else {
+            type = OBJ_TYPE.ENEMY_BULLET;
+            from = BULLET_TYPE.ENEMY;
+        }
+        var x,y;
+
         switch(this.direction){
             case DIRECTION.UP:
-                Bullets.push(new Bullet(this.x,this.y - 15,BULLET_SPEED.FAST,this.direction,BULLET_TYPE.TANK));
+                x = this.x;
+                y = this.y - 15;
                 break;
             case DIRECTION.DOWN:
-                Bullets.push(new Bullet(this.x,this.y + 15,BULLET_SPEED.FAST,this.direction,BULLET_TYPE.TANK));
+                x = this.x;
+                y = this.y + 15;
                 break;
             case DIRECTION.LEFT:
-                Bullets.push(new Bullet(this.x-15,this.y,BULLET_SPEED.FAST,this.direction,BULLET_TYPE.TANK));
+                x = this.x - 15;
+                y = this.y;
                 break;
             case DIRECTION.RIGHT:
-                Bullets.push(new Bullet(this.x+15,this.y,BULLET_SPEED.FAST,this.direction,BULLET_TYPE.TANK));
+                x = this.x + 15;
+                y = this.y;
                 break;
             default:
-            // nothing
+        }
+        if(this.gunStyle == GUN_STYLE.NORMAL){
+            Bullets.push(new Bullet(x,y,BULLET_SPEED.FAST,direction,type,from));
+        } else if(this.gunStyle == GUN_STYLE.SHOTGUN){
+            Bullets.push(new Bullet(x,y,BULLET_SPEED.FAST,direction - Math.PI / 6,type,from));
+            Bullets.push(new Bullet(x,y,BULLET_SPEED.FAST,direction - Math.PI / 12 ,type,from));
+            Bullets.push(new Bullet(x,y,BULLET_SPEED.FAST,direction,type,from));
+            Bullets.push(new Bullet(x,y,BULLET_SPEED.FAST,direction + Math.PI / 12,type,from));
+            Bullets.push(new Bullet(x,y,BULLET_SPEED.FAST,direction + Math.PI / 6,type,from));
         }
     }
 }
 
 //bullet
 class Bullet extends Obj{
-    constructor(x,y,speed,direction,from) {
-        super(x,y,speed,direction);
+    constructor(x,y,speed,direction,type,from) {
+        super(x,y,speed,direction,type);
         this.from = from;
     }
 
     isHit (){
         var th = this;
-        Enemies.forEach(function (e) {
-            if(th.x > e.x - 15 && th.x <e.x + 15 && th.y > e.y - 15 && th.y <e.y + 15 ){
-                e.die();
-                th.die();
-                createEnemy();
-                if(Enemies.length < 30){
+        if(th.type == OBJ_TYPE.TANK_BULLET){
+            Enemies.forEach(function (e) {
+                if(th.x > e.x - 15 && th.x <e.x + 15 && th.y > e.y - 15 && th.y <e.y + 15 ){
+                    e.die();
+                    th.die();
+                    if(th.type == OBJ_TYPE.TANK_BULLET){
+                        SCORE++;
+                    }
                     createEnemy();
+                    return;
                 }
+            });
+        }
 
-                return;
-            }
-        });
-
-        Enemies.sort(function(e1,e2){
-            if(!e1.isAlive && e2.isAlive){
-                return -1;
-            } else if(e1.isAlive && !e2.isAlive){
-                return 1;
-            } else {
-                return 0;
-            }
-        });
-        for(var i in Enemies){
-            if(Enemies[i].isAlive){
-                while(i-- > 0){
-                    Enemies.shift();
-                }
-                break;
-            }
+        if(th.type == OBJ_TYPE.ENEMY_BULLET &&th.x > tank.x - 15 && th.x <tank.x + 15 && th.y > tank.y - 15 && th.y <tank.y + 15 ){
+            th.die();
+            tank.die();
+            dieEvent();
         }
     }
 }
