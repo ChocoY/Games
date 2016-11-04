@@ -8,6 +8,8 @@ var SCORE = 0;
 var LIFE = 99;
 var READY_TO_REBORN = false;
 
+var FPS = 60;
+
 !function initController(){
     window.addEventListener('keydown',function (e){
         switch (e.code){
@@ -71,13 +73,16 @@ var READY_TO_REBORN = false;
 function enemyMove(){
     Enemies.forEach(function(e){
         if(Math.random() <= ENEMY_SETTING.MOVE){
-            if(Math.random() <= ENEMY_SETTING.TURN){
-                e.move(DIRECTION.randomDirection());
-            } else {
-                e.move(e.direction);
-            }
+            e.isMoving = true;
+        } else {
+            e.isMoving = false;
         }
-
+        if(Math.random() <= ENEMY_SETTING.TURN){
+            e.turn(DIRECTION.randomDirection());
+        } else {
+            e.move(e.direction);
+        }
+        e.restoreGunShot();
         if(Math.random() <= ENEMY_SETTING.FIRE){
             e.fire();
         }
@@ -85,7 +90,12 @@ function enemyMove(){
 }
 
 function tankMove(){
-    tank.move(TANK_MOTION);
+    if(TANK_MOTION != null){
+        tank.turn(TANK_MOTION);
+        tank.isMoving = true;
+        tank.move();
+    }
+    tank.restoreGunShot();
     if(FIRE){
         tank.fire();
     }
@@ -94,42 +104,27 @@ function bulletMove(){
     Bullets.forEach(function(b){
         b.move();
         b.isHit();
-    })
+    });
 }
 
+var enemyCount = 0;
 function createEnemy(){
-    if(Enemies.length < 25) {
-        Enemies.push(new Tank(20 + Math.random() * (SCREEN_W - 40), 20 + Math.random() * (SCREEN_H - 40), TANK_SPEED.SLOW, DIRECTION.randomDirection(), OBJ_TYPE.ENEMY,GUN_STYLE.NORMAL));
+    if(Enemies.length < 50) {
+        Enemies.push(new Tank('E-'+ (++enemyCount),20 + Math.random() * (SCREEN_W - 40), 20 + Math.random() * (SCREEN_H - 40), TANK_SPEED.SLOW, DIRECTION.randomDirection(), OBJ_TYPE.ENEMY,GUN_STYLE.NORMAL,TANK_MAX_SHOTS.ENEMY,TANK_SHOT_INTERVAL.ENEMY));
     }
 }
 
 function createTank(){
-    tank = new Tank(SCREEN_W / 2,SCREEN_H - 50,TANK_SPEED.FAST,DIRECTION.UP,OBJ_TYPE.TANK,GUN_STYLE.NORMAL);
+    tank = new Tank('T-1',SCREEN_W / 2,SCREEN_H - 50,TANK_SPEED.FAST,DIRECTION.UP,OBJ_TYPE.TANK,GUN_STYLE.SHOTGUN,TANK_MAX_SHOTS.TANK,TANK_SHOT_INTERVAL.TANK);
 }
 
 function clearBattleField(){
-
-    function clearDead(objArray){
-        objArray.sort(function(e1,e2){
-            if(!e1.isAlive && e2.isAlive){
-                return -1;
-            } else if(e1.isAlive && !e2.isAlive){
-                return 1;
-            } else {
-                return 0;
-            }
+    Enemies = Enemies.filter(function(o){
+            return o.isAlive;
         });
-        for(var i in objArray){
-            if(objArray[i].isAlive){
-                while(i-- > 0){
-                    objArray.shift();
-                }
-                break;
-            }
-        }
-    }
-    clearDead(Enemies);
-    clearDead(Bullets);
+    Bullets = Bullets.filter(function(o){
+            return o.isAlive;
+        });
 }
 
 !function refresh(){
@@ -140,12 +135,48 @@ function clearBattleField(){
         clearBattleField();
         draw();
         refresh();
-    },1000/40);
+    },1000/FPS);
 }();
 
 function dieEvent(){
     if(LIFE > 0){
         READY_TO_REBORN = true;
+    }
+}
+
+function impactEvent(from,to){
+    console.log('impact:from ' + from.id + ' to ' + to.id);
+    if(to.isMoving){
+        to.move();
+        to.isMoving = false;
+    }
+    switch (from.direction) {
+        case DIRECTION.UP:
+            if((from.isMoving && !to.isMoving) || (from.isMoving && to.isMoving && to.direction != DIRECTION.DOWN)){
+                from.y = to.y + 31;
+            } else if(from.isMoving && to.isMoving && DIRECTION.DOWN){
+                var distance = to.y - from.y;
+                var n = distance * from.speed /(from.speed + to.speed);
+                from.y += n;
+                to.y = to.y - (distance - n);
+            }
+            break;
+        case DIRECTION.DOWN:
+            if((from.isMoving && !to.isMoving) || (from.isMoving && to.isMoving && to.direction != DIRECTION.UP)){
+                from.y = to.y - 31;
+            } else if(from.isMoving && to.isMoving && DIRECTION.UP){
+                var distance = from.y - to.y;
+                var n = distance * from.speed /(from.speed + to.speed);
+                from.y += n;
+                to.y = to.y - (distance - n);
+            }
+            break;
+        case DIRECTION.LEFT:
+            from.x = e.x + 31;
+            break;
+        case DIRECTION.RIGHT:
+            from.x = e.x - 31;
+            break;
     }
 }
 

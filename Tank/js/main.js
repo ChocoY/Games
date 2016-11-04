@@ -10,7 +10,7 @@ var tank;
 
 !function init() {
     createTank();
-    //createEnemy();
+    createEnemy();
     draw();
 }();
 
