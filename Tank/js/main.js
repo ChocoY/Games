@@ -4,9 +4,9 @@
 
 
 
-var Bullets = new Array();
-var Enemies = new Array();
-var tank;
+let Bullets = new Array();
+let Enemies = new Array();
+let tank;
 
 !function init() {
     createTank();

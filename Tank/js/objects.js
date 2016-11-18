@@ -23,7 +23,7 @@ const DIRECTION ={
                 return 'RIGHT';
                 break;
             default:
-                var deg = Math.floor(direction * 90 /Math.PI);
+                let deg = Math.floor(direction * 90 /Math.PI);
                 return (deg>0?deg:360+deg)+'deg';
         }
     }
@@ -124,14 +124,14 @@ class Obj{
     }
 
     impactDetective(){
-        var th = this;
+        let th = this;
         if(th.type == OBJ_TYPE.TANK || th.type == OBJ_TYPE.ENEMY ) {
-            var e = tank;
+            let e = tank;
             if (e.id != th.id) {
-                var maxX = e.x + 15;
-                var minX = e.x - 15;
-                var maxY = e.y + 15;
-                var minY = e.y - 15;
+                let maxX = e.x + 15;
+                let minX = e.x - 15;
+                let maxY = e.y + 15;
+                let minY = e.y - 15;
                 if ((minX < th.x - 15 && th.x - 15 < maxX && minY < th.y - 15 && th.y - 15 < maxY)
                     || (minX < th.x - 15 && th.x - 15 < maxX && minY < th.y + 15 && th.y + 15 < maxY)
                     || (minX < th.x + 15 && th.x + 15 < maxX && minY < th.y + 15 && th.y + 15 < maxY)
@@ -142,10 +142,10 @@ class Obj{
             }
             Enemies.forEach(function (e) {
                 if (e.id != th.id) {
-                    var maxX = e.x + 15;
-                    var minX = e.x - 15;
-                    var maxY = e.y + 15;
-                    var minY = e.y - 15;
+                    let maxX = e.x + 15;
+                    let minX = e.x - 15;
+                    let maxY = e.y + 15;
+                    let minY = e.y - 15;
                     if ((minX < th.x - 15 && th.x - 15 < maxX && minY < th.y - 15 && th.y - 15 < maxY)
                         || (minX < th.x - 15 && th.x - 15 < maxX && minY < th.y + 15 && th.y + 15 < maxY)
                         || (minX < th.x + 15 && th.x + 15 < maxX && minY < th.y + 15 && th.y + 15 < maxY)
@@ -178,9 +178,9 @@ class Tank extends Obj{
             this.cooldownArray.push(this.interval);
         }
 
-        var type;
-        var from;
-        var direction = this.direction;
+        let type;
+        let from;
+        let direction = this.direction;
         if(this.type == OBJ_TYPE.TANK){
             type = OBJ_TYPE.TANK_BULLET;
             from = BULLET_TYPE.TANK;
@@ -188,7 +188,7 @@ class Tank extends Obj{
             type = OBJ_TYPE.ENEMY_BULLET;
             from = BULLET_TYPE.ENEMY;
         }
-        var x,y;
+        let x,y;
 
         switch(this.direction){
             case DIRECTION.UP:
@@ -230,8 +230,8 @@ class Tank extends Obj{
     }
 
     restoreGunShot(){
-        var array = [];
-        for(var i = 0;i < this.cooldownArray.length;i++){
+        let array = [];
+        for(let i = 0;i < this.cooldownArray.length;i++){
             if(this.cooldownArray[i] == 0){
                 this.maxShots++;
             } else {
@@ -250,7 +250,7 @@ class Bullet extends Obj{
     }
 
     isHit(){
-        var th = this;
+        let th = this;
         if(th.isAlive){
             if(th.type == OBJ_TYPE.TANK_BULLET){
                 Enemies.filter(function(e){

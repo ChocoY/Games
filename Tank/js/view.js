@@ -3,25 +3,25 @@
  */
 
 
-var ca = document.getElementsByTagName('canvas')[0];
+let ca = document.getElementsByTagName('canvas')[0];
 
-var SCREEN_W = ca.offsetWidth;
-var SCREEN_H = ca.offsetHeight;
+let SCREEN_W = ca.offsetWidth;
+let SCREEN_H = ca.offsetHeight;
 ca.width = SCREEN_W;
 ca.height = SCREEN_H;
-var c = ca.getContext('2d');
+let c = ca.getContext('2d');
 c.width = SCREEN_W;
 c.height = SCREEN_H;
 
 
-var lastRefreshTime = Date.now();
+let lastRefreshTime = Date.now();
 function showScore() {
     c.font = SCREEN_H / 30 + 'px Arial';
     c.fillStyle = '#fff';
     c.textAlign = 'start';
     c.textBaseline = 'top';
-    var now = Date.now();
-    var fps = 1000/(now - lastRefreshTime);
+    let now = Date.now();
+    let fps = 1000/(now - lastRefreshTime);
     lastRefreshTime = now;
     c.fillText('score:'+SCORE + ' life:' + LIFE + ' fps:'+ Math.floor(fps),10,10);
 }
@@ -60,13 +60,13 @@ function drawTank(tank){
     }
 }
 
-var flashN = 0;
+let flashN = 0;
 function deadInfo(){
     c.fillStyle = '#fff';
 
     c.strokeStyle = '#999';
     if(READY_TO_REBORN){
-        var str = "GAME OVER";
+        let str = "GAME OVER";
         c.font = Math.min(SCREEN_H/8,SCREEN_W/12) +"px Arial";
         c.textBaseline = 'bottom';
         c.textAlign = 'center';
@@ -75,7 +75,7 @@ function deadInfo(){
         c.strokeText(str,SCREEN_W/2,SCREEN_H*2/5);
 
         if((flashN = ++flashN)%FPS/4 <=　FPS/8 ) {
-            var str = "press Enter to reborn";
+            let str = "press Enter to reborn";
             c.font = Math.min(SCREEN_H / 20,SCREEN_W/ 24) + "px Arial";
             c.textBaseline = 'top';
             c.textAlign = 'center';
@@ -83,8 +83,8 @@ function deadInfo(){
         }
     }
 }
-var TANK_BULLET_FILL_STYLE = function(){
-    var grd = c.createRadialGradient(75,50,5,90,60,100);
+let TANK_BULLET_FILL_STYLE = function(){
+    let grd = c.createRadialGradient(75,50,5,90,60,100);
     grd.addColorStop(0,"red");
     grd.addColorStop(1,"white");
     return grd;

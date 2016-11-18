@@ -2,13 +2,13 @@
  * Created by YangShushuo on 2016/9/29 0029.
  */
 
-var TANK_MOTION;
-var FIRE = false;
-var SCORE = 0;
-var LIFE = 99;
-var READY_TO_REBORN = false;
+let TANK_MOTION;
+let FIRE = false;
+let SCORE = 0;
+let LIFE = 99;
+let READY_TO_REBORN = false;
 
-var FPS = 60;
+let FPS = 60;
 
 !function initController(){
     window.addEventListener('keydown',function (e){
@@ -107,7 +107,7 @@ function bulletMove(){
     });
 }
 
-var enemyCount = 0;
+let enemyCount = 0;
 function createEnemy(){
     if(Enemies.length < 50) {
         Enemies.push(new Tank('E-'+ (++enemyCount),20 + Math.random() * (SCREEN_W - 40), 20 + Math.random() * (SCREEN_H - 40), TANK_SPEED.SLOW, DIRECTION.randomDirection(), OBJ_TYPE.ENEMY,GUN_STYLE.NORMAL,TANK_MAX_SHOTS.ENEMY,TANK_SHOT_INTERVAL.ENEMY));
@@ -155,8 +155,8 @@ function impactEvent(from,to){
             if((from.isMoving && !to.isMoving) || (from.isMoving && to.isMoving && to.direction != DIRECTION.DOWN)){
                 from.y = to.y + 31;
             } else if(from.isMoving && to.isMoving && DIRECTION.DOWN){
-                var distance = to.y - from.y;
-                var n = distance * from.speed /(from.speed + to.speed);
+                let distance = to.y - from.y;
+                let n = distance * from.speed /(from.speed + to.speed);
                 from.y += n;
                 to.y = to.y - (distance - n);
             }
@@ -165,8 +165,8 @@ function impactEvent(from,to){
             if((from.isMoving && !to.isMoving) || (from.isMoving && to.isMoving && to.direction != DIRECTION.UP)){
                 from.y = to.y - 31;
             } else if(from.isMoving && to.isMoving && DIRECTION.UP){
-                var distance = from.y - to.y;
-                var n = distance * from.speed /(from.speed + to.speed);
+                let distance = from.y - to.y;
+                let n = distance * from.speed /(from.speed + to.speed);
                 from.y += n;
                 to.y = to.y - (distance - n);
             }

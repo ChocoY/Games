@@ -81,5 +81,5 @@ module.exports = function(grunt) {
     grunt.loadNpmTasks('grunt-contrib-uglify');
 
     // Default task(s).
-    grunt.registerTask('default', ['sass','jade','jshint','uglify']);
+    grunt.registerTask('default', ['sass','jade','jshint','prettify','uglify']);
 };
