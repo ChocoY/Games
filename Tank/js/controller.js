@@ -7,8 +7,8 @@ let FIRE = false;
 let SCORE = 0;
 let LIFE = 99;
 let READY_TO_REBORN = false;
-
-let FPS = 60;
+let bornTime = Date.now();
+let dieTime = 0;
 
 !function initController(){
     window.addEventListener('keydown',function (e){
@@ -70,7 +70,7 @@ let FPS = 60;
     });
 }();
 
-function enemyMove(){
+function enemiesCalcNextMove(){
     Enemies.forEach(function(e){
         if(Math.random() <= ENEMY_SETTING.MOVE){
             e.isMoving = true;
@@ -80,7 +80,7 @@ function enemyMove(){
         if(Math.random() <= ENEMY_SETTING.TURN){
             e.turn(DIRECTION.randomDirection());
         } else {
-            e.move(e.direction);
+            e.calcNextMove(e.direction);
         }
         e.restoreGunShot();
         if(Math.random() <= ENEMY_SETTING.FIRE){
@@ -89,20 +89,20 @@ function enemyMove(){
     });
 }
 
-function tankMove(){
+function tankCalcNextMove(){
     if(TANK_MOTION != null){
         tank.turn(TANK_MOTION);
         tank.isMoving = true;
-        tank.move();
+        tank.calcNextMove();
     }
     tank.restoreGunShot();
     if(FIRE){
         tank.fire();
     }
 }
-function bulletMove(){
+function bulletsCalcNextMove(){
     Bullets.forEach(function(b){
-        b.move();
+        b.calcNextMove();
         b.isHit();
     });
 }
@@ -114,8 +114,13 @@ function createEnemy(){
     }
 }
 
+function renewLiveTime() {
+    bornTime = Date.now();
+    dieTime = 0;
+}
 function createTank(){
     tank = new Tank('T-1',SCREEN_W / 2,SCREEN_H - 50,TANK_SPEED.FAST,DIRECTION.UP,OBJ_TYPE.TANK,GUN_STYLE.SHOTGUN,TANK_MAX_SHOTS.TANK,TANK_SHOT_INTERVAL.TANK);
+    renewLiveTime();
 }
 
 function clearBattleField(){
@@ -127,11 +132,22 @@ function clearBattleField(){
         });
 }
 
+function doMove() {
+    tank.moveToNextPosition();
+    Enemies.forEach(function(e){
+        e.moveToNextPosition();
+    });
+    Bullets.forEach(function(e){
+        e.moveToNextPosition();
+    });
+}
+
 !function refresh(){
     setTimeout(function(){
-        tankMove();
-        enemyMove();
-        bulletMove();
+        tankCalcNextMove();
+        enemiesCalcNextMove();
+        bulletsCalcNextMove();
+        doMove();
         clearBattleField();
         draw();
         refresh();
@@ -144,40 +160,46 @@ function dieEvent(){
     }
 }
 
-function impactEvent(from,to){
-    console.log('impact:from ' + from.id + ' to ' + to.id);
-    if(to.isMoving){
-        to.move();
-        to.isMoving = false;
-    }
-    switch (from.direction) {
-        case DIRECTION.UP:
-            if((from.isMoving && !to.isMoving) || (from.isMoving && to.isMoving && to.direction != DIRECTION.DOWN)){
-                from.y = to.y + 31;
-            } else if(from.isMoving && to.isMoving && DIRECTION.DOWN){
-                let distance = to.y - from.y;
-                let n = distance * from.speed /(from.speed + to.speed);
-                from.y += n;
-                to.y = to.y - (distance - n);
+
+function impactDetective(){
+    let allTanks = {};
+    //allTanks.push(tank);
+    //allTanks.push(Enemies);
+
+    allTanks.forEach(function(t){
+        let maxX = t.nextX + 15;
+        let minX = t.nextX - 15;
+        let maxY = t.nextY + 15;
+        let minY = t.nextY - 15;
+        allTanks.forEach(function(tt){
+            if (t.id != tt.id) {
+                if ((minX < tt.nextX - 15 && tt.nextX - 15 < maxX && minY < tt.nextY - 15 && tt.nextY - 15 < maxY)
+                    || (minX < tt.nextX - 15 && tt.nextX - 15 < maxX && minY < tt.nextY + 15 && tt.nextY + 15 < maxY)
+                    || (minX < tt.nextX + 15 && tt.nextX + 15 < maxX && minY < tt.nextY + 15 && tt.nextY + 15 < maxY)
+                    || (minX < tt.nextX + 15 && tt.nextX + 15 < maxX && minY < tt.nextY - 15 && tt.nextY - 15 < maxY)
+                ) {
+                    impactEvent(tt, tank);
+                }
             }
+        });
+    });
+}
+
+function impactEvent(from,to){
+/*    switch (from.direction) {
+        case DIRECTION.UP:
+            from.nextY = to.y - 15;
             break;
         case DIRECTION.DOWN:
-            if((from.isMoving && !to.isMoving) || (from.isMoving && to.isMoving && to.direction != DIRECTION.UP)){
-                from.y = to.y - 31;
-            } else if(from.isMoving && to.isMoving && DIRECTION.UP){
-                let distance = from.y - to.y;
-                let n = distance * from.speed /(from.speed + to.speed);
-                from.y += n;
-                to.y = to.y - (distance - n);
-            }
+            from.nextY = to.y + 15;
             break;
         case DIRECTION.LEFT:
-            from.x = e.x + 31;
+            from.nextX = to.x + 15;
             break;
         case DIRECTION.RIGHT:
-            from.x = e.x - 31;
+            from.nextY = to.x - 15;
             break;
-    }
+    }*/
 }
 
 function reborn(){

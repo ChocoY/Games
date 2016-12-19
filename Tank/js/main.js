@@ -4,8 +4,8 @@
 
 
 
-let Bullets = new Array();
-let Enemies = new Array();
+let Bullets = [];
+let Enemies = [];
 let tank;
 
 !function init() {
@@ -13,7 +13,3 @@ let tank;
     createEnemy();
     draw();
 }();
-
-function start(){
-
-}
