@@ -27,7 +27,7 @@ module.exports = function(grunt) {
                     }
                 },
                 files: {
-                    'html/index.html':'jade/index.pug'
+                    'html/index.html':'pug/index.pug'
                 }
             }
         },
