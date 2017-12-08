@@ -119,7 +119,7 @@ function renewLiveTime() {
     dieTime = 0;
 }
 function createTank(){
-    tank = new Tank('T-1',SCREEN_W / 2,SCREEN_H - 50,TANK_SPEED.FAST,DIRECTION.UP,OBJ_TYPE.TANK,GUN_STYLE.SHOTGUN,TANK_MAX_SHOTS.TANK,TANK_SHOT_INTERVAL.TANK);
+    tank = new Tank('T-1',SCREEN_W / 2,SCREEN_H - 50,TANK_SPEED.FAST,DIRECTION.UP,OBJ_TYPE.TANK,GUN_STYLE.NORMAL,TANK_MAX_SHOTS.TANK,TANK_SHOT_INTERVAL.TANK);
     renewLiveTime();
 }
 
@@ -160,11 +160,10 @@ function dieEvent(){
     }
 }
 
-
 function impactDetective(){
     let allTanks = {};
-    //allTanks.push(tank);
-    //allTanks.push(Enemies);
+    allTanks.push(tank);
+    allTanks.push(Enemies);
 
     allTanks.forEach(function(t){
         let maxX = t.nextX + 15;
@@ -186,20 +185,7 @@ function impactDetective(){
 }
 
 function impactEvent(from,to){
-/*    switch (from.direction) {
-        case DIRECTION.UP:
-            from.nextY = to.y - 15;
-            break;
-        case DIRECTION.DOWN:
-            from.nextY = to.y + 15;
-            break;
-        case DIRECTION.LEFT:
-            from.nextX = to.x + 15;
-            break;
-        case DIRECTION.RIGHT:
-            from.nextY = to.x - 15;
-            break;
-    }*/
+
 }
 
 function reborn(){
