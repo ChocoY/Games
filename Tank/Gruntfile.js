@@ -70,16 +70,25 @@ module.exports = function(grunt) {
                     module: true
                 }
             }
+        },
+        watch: {
+            scripts: {
+                fiiles: ['src/js*.js', 'src/css/*.css'],
+                tasks: ['concat', 'sass', 'jshint', 'uglify', 'sass', 'cssmin']
+            }
         }
     });
+    
     grunt.loadNpmTasks('grunt-sass');
     grunt.loadNpmTasks('grunt-contrib-jade');
     grunt.loadNpmTasks('grunt-contrib-jshint');
     grunt.loadNpmTasks('grunt-prettify');
+    grunt.loadNpmTasks('grunt-contrib-watch');
 
     // Load the plugin that provides the "uglify" task.
     grunt.loadNpmTasks('grunt-contrib-uglify');
 
     // Default task(s).
     grunt.registerTask('default', ['sass','jade','jshint','prettify','uglify']);
+    grunt.registerTask('myWatch', ['default', 'watch'])
 };
